@@ -15,6 +15,7 @@ import StockPage from "../pages/StockPage";
 import PaymentsPage from "../pages/PaymentsPage";
 import ProductsPage from "../pages/ProductsPage";
 import UsersPage from "../pages/UsersPage";
+import ReportsPage from "../pages/ReportsPage";
 
 export default function MainLayout({
   user,
@@ -58,6 +59,12 @@ export default function MainLayout({
     },
     "/payments": {
       title: "Payments",
+    },
+    "/reports": {
+      title: "Reports",
+    },
+    "/users": {
+      title: "Users",
     },
   };
   const currentMeta = routeMeta[location.pathname] || routeMeta["/"];
@@ -114,7 +121,10 @@ export default function MainLayout({
           <NavItem to="/stock">Stock</NavItem>
           <NavItem to="/payments">Payments</NavItem>
           {user?.role === "ADMIN" ? (
-            <NavItem to="/users">Users</NavItem>
+            <>
+              <NavItem to="/reports">Reports</NavItem>
+              <NavItem to="/users">Users</NavItem>
+            </>
           ) : null}
         </nav>
 
@@ -239,7 +249,10 @@ export default function MainLayout({
             }
           />
           {user?.role === "ADMIN" ? (
-            <Route path="/users" element={<UsersPage />} />
+            <>
+              <Route path="/reports" element={<ReportsPage />} />
+              <Route path="/users" element={<UsersPage />} />
+            </>
           ) : null}
         </Routes>
       </main>

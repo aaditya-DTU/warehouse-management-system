@@ -18,6 +18,7 @@ import stockRoutes      from './routes/stockRoutes.js';
 import deliveryRoutes   from './routes/deliveryRoutes.js';
 import paymentRoutes    from './routes/paymentRoutes.js';   
 import ensureAdminUser  from './utils/bootstrapAdmin.js';
+import reportsRoutes from "./routes/reportsRoutes.js";
 
 const app = express();
 
@@ -85,7 +86,8 @@ app.use('/api/customers',  customerRoutes);
 app.use('/api/orders',     orderRoutes);
 app.use('/api/stock',      stockRoutes);
 app.use('/api/deliveries', deliveryRoutes);
-app.use('/api/payments',   paymentRoutes);   
+app.use('/api/payments',   paymentRoutes); 
+app.use("/api/reports", reportsRoutes);  
 
 
 app.use(errorHandler);
