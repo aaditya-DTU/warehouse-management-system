@@ -34,60 +34,112 @@ function Products({ products, setProducts }) {
   };
 
   return (
-    <div className="products">
-      <h1>Products</h1>
+    <div className="page-shell">
+      <section className="split-panel">
+        <div className="entity-form-card">
+          <div className="section-heading">
+            <p className="section-kicker">Product master</p>
+            <h3>Add a warehouse product</h3>
+          </div>
 
-      <div className="product-form">
-        <input
-          type="text"
-          placeholder="Product Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+          <label className="form-field">
+            <span>Product name</span>
+            <input
+              type="text"
+              placeholder="Product Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
 
-        <input
-          type="number"
-          placeholder="MRP"
-          value={mrp}
-          onChange={(e) => setMrp(e.target.value)}
-        />
+          <label className="form-field">
+            <span>MRP (₹)</span>
+            <input
+              type="number"
+              placeholder="0"
+              value={mrp}
+              onChange={(e) => setMrp(e.target.value)}
+            />
+          </label>
 
-        <select value={unit} onChange={(e) => setUnit(e.target.value)}>
-          <option>Select Unit</option>
-          <option value="kg">kg</option>
-          <option value="litre">litre</option>
-          <option value="piece">piece</option>
-        </select>
-      </div>
+          <label className="form-field">
+            <span>Unit</span>
+            <select value={unit} onChange={(e) => setUnit(e.target.value)}>
+              <option value="">Select Unit</option>
+              <option value="kg">kg</option>
+              <option value="litre">litre</option>
+              <option value="piece">piece</option>
+            </select>
+          </label>
 
-      <label className="checkbox-row">
-        <input
-          type="checkbox"
-          checked={isActive}
-          onChange={(e) => setIsActive(e.target.checked)}
-        />
-        <span>Is Active</span>
-      </label>
+          <label className="toggle-row">
+            <input
+              type="checkbox"
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+            />
+            <span>Keep product active for ordering</span>
+          </label>
 
-      <button onClick={handleCreateProduct}>Add Product</button>
+          <button
+            type="button"
+            className="primary-button"
+            onClick={handleCreateProduct}
+          >
+            Add Product
+          </button>
+        </div>
+      </section>
 
-      <div className="product-list">
-        {products.map((product) => (
-          <div key={product.id} className="product-card">
-            <strong>{product.name}</strong>
-            <div>MRP: ₹{product.mrp}</div>
-            <div>Unit: {product.unit}</div>
-            <div>Total Qty: {product.totalQty}</div>
-            <div>Reserved Qty: {product.reservedQty}</div>
-            <div>Available Qty: {product.availableQty}</div>
-            <div
-              className={product.isActive ? "badge-active" : "badge-inactive"}
-            >
-              {product.isActive ? "Active" : "Inactive"}
+      {products.length > 0 && (
+        <section className="module-panel">
+          <div className="list-toolbar" style={{ gridTemplateColumns: '1fr' }}>
+            <div>
+              <p className="section-kicker">Catalog</p>
+              <h3>{products.length} products</h3>
             </div>
           </div>
-        ))}
-      </div>
+
+          <div className="entity-grid">
+            {products.map((product) => (
+              <article key={product.id} className="entity-card">
+                <div className="card-row">
+                  <div>
+                    <strong>{product.name}</strong>
+                    <p>{product.unit}</p>
+                  </div>
+                  <span className={product.isActive ? "badge-active" : "badge-inactive"}>
+                    {product.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+
+                <div className="info-grid">
+                  <div>
+                    <span className="info-label">MRP</span>
+                    <p style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                      ₹{product.mrp?.toLocaleString('en-IN')}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="info-label">Total Qty</span>
+                    <p>{product.totalQty}</p>
+                  </div>
+                  <div>
+                    <span className="info-label">Reserved Qty</span>
+                    <p>{product.reservedQty}</p>
+                  </div>
+                  <div>
+                    <span className="info-label">Available Qty</span>
+                    <p style={{ color: (product.availableQty ?? 0) <= 5 ? '#8f2727' : 'inherit', fontWeight: (product.availableQty ?? 0) <= 5 ? 600 : 400 }}>
+                      {product.availableQty ?? 0}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -140,131 +140,130 @@ export default function Deliveries({
   // UI
   // =========================
   return (
-    <div>
-      <h1>Deliveries</h1>
-
-      {/* ================= SECTION 1 ================= */}
-      <h3>Choose Order</h3>
-      <select
-        value={selectedOrderId}
-        onChange={(e) => setSelectedOrderId(Number(e.target.value))}
-      >
-        <option value="">-- Select Pending Order --</option>
-        {pendingOrders.map((order) => (
-          <option key={order.id} value={order.id}>
-            {order.id} - {order.customerName}
-          </option>
-        ))}
-      </select>
-
-      {/* ================= SECTION 2 ================= */}
-      {selectedOrder && (
-        <>
-          <h3>Order Details</h3>
-
-          <div>
-            <label>Order No</label>
-            <input value={selectedOrder.id} readOnly />
+    <div className="page-shell">
+      <section className="split-panel">
+        <div className="entity-form-card">
+          <div className="section-heading">
+            <p className="section-kicker">Delivery action</p>
+            <h3>Choose Order</h3>
           </div>
 
-          <div>
-            <label>Delivery Date</label>
-            <input
-              type="date"
-              value={deliveryDate}
-              onChange={(e) => setDeliveryDate(e.target.value)}
-            />
-          </div>
-
-          {/* customer mini table */}
-          <h4>Customer Details</h4>
-          <table border="1">
-            <tbody>
-              <tr>
-                <td>Name</td>
-                <td>{selectedOrder.customerName}</td>
-              </tr>
-              <tr>
-                <td>Contact</td>
-                <td>{selectedOrder.mobileNumber}</td>
-              </tr>
-              <tr>
-                <td>Address</td>
-                <td>{selectedOrder.deliveryAddress}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          {/* product mini table */}
-          <h4>Product Details</h4>
-          <table border="1">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Qty</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedOrder.items.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.productName}</td>
-                  <td>{item.quantity}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
-
-      {/* ================= SECTION 3 ================= */}
-      {selectedOrder && (
-        <>
-          <h3>Delivery Status</h3>
-
-          <select
-            value={deliveryStatus}
-            onChange={(e) => setDeliveryStatus(e.target.value)}
-          >
-            <option value="">-- Select Status --</option>
-            <option value="DELIVERED">Delivered</option>
-            <option value="PENDING">Pending</option>
-            <option value="NOT_DELIVERED">Not Delivered</option>
-          </select>
-
-          {(deliveryStatus === "PENDING" ||
-            deliveryStatus === "NOT_DELIVERED") && (
+          <label className="form-field">
+            <span>Pending order</span>
             <select
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              value={selectedOrderId}
+              onChange={(e) => setSelectedOrderId(Number(e.target.value))}
             >
-              <option value="">-- Select Reason --</option>
-              <option value="DOOR_CLOSED">Door closed</option>
-              <option value="CUSTOMER_NOT_AVAILABLE">
-                Customer not available
-              </option>
-              <option value="CUSTOMER_REFUSED">Customer refused</option>
-              <option value="PAYMENT_ISSUE">Payment issue</option>
-              <option value="VEHICLE_ISSUE">Vehicle issue</option>
-              <option value="OTHER">Other</option>
+              <option value="">Select Pending Order</option>
+              {pendingOrders.map((order) => (
+                <option key={order.id} value={order.id}>
+                  {order.id} – {order.customerName}
+                </option>
+              ))}
             </select>
+          </label>
+
+          {selectedOrder && (
+            <>
+              <div className="detail-card">
+                <div className="section-heading">
+                  <p className="section-kicker">Order details</p>
+                </div>
+
+                <div className="info-grid" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
+                  <div>
+                    <span className="info-label">Order No</span>
+                    <p style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedOrder.id}</p>
+                  </div>
+                  <div>
+                    <span className="info-label">Customer</span>
+                    <p style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{selectedOrder.customerName}</p>
+                  </div>
+                  <div>
+                    <span className="info-label">Contact</span>
+                    <p>{selectedOrder.mobileNumber}</p>
+                  </div>
+                  <div>
+                    <span className="info-label">Address</span>
+                    <p>{selectedOrder.deliveryAddress}</p>
+                  </div>
+                </div>
+
+                <div className="list-divider" />
+
+                <p className="section-kicker" style={{ marginBottom: '0.6rem' }}>Products</p>
+                <div className="mini-list">
+                  {selectedOrder.items.map((item, index) => (
+                    <div key={index} className="mini-list-row">
+                      <span>{item.productName}</span>
+                      <span style={{ fontWeight: 600 }}>{item.quantity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <label className="form-field">
+                <span>Delivery date</span>
+                <input
+                  type="date"
+                  value={deliveryDate}
+                  onChange={(e) => setDeliveryDate(e.target.value)}
+                />
+              </label>
+
+              <label className="form-field">
+                <span>Delivery status</span>
+                <select
+                  value={deliveryStatus}
+                  onChange={(e) => setDeliveryStatus(e.target.value)}
+                >
+                  <option value="">Select Status</option>
+                  <option value="DELIVERED">Delivered</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="NOT_DELIVERED">Not Delivered</option>
+                </select>
+              </label>
+
+              {(deliveryStatus === "PENDING" || deliveryStatus === "NOT_DELIVERED") && (
+                <label className="form-field">
+                  <span>Reason</span>
+                  <select
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                  >
+                    <option value="">Select Reason</option>
+                    <option value="DOOR_CLOSED">Door closed</option>
+                    <option value="CUSTOMER_NOT_AVAILABLE">Customer not available</option>
+                    <option value="CUSTOMER_REFUSED">Customer refused</option>
+                    <option value="PAYMENT_ISSUE">Payment issue</option>
+                    <option value="VEHICLE_ISSUE">Vehicle issue</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </label>
+              )}
+
+              <div className="button-row" style={{ marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="primary-button"
+                  style={{ flex: 1 }}
+                  onClick={handleUpdateDelivery}
+                >
+                  Update Delivery
+                </button>
+                <button
+                  type="button"
+                  className="ghost-button"
+                  disabled={!isDelivered}
+                  onClick={() => onViewPayment?.(selectedOrderId)}
+                >
+                  View Payment
+                </button>
+              </div>
+            </>
           )}
-
-          <br />
-          <br />
-
-          <button onClick={handleUpdateDelivery}>
-            Update Delivery
-          </button>
-
-          {/* disabled until delivered */}
-          <button
-            disabled={!isDelivered}
-            onClick={() => onViewPayment?.(selectedOrderId)}
-          >
-            View Payment
-          </button>
-        </>
-      )}
+        </div>
+      </section>
     </div>
   );
 }

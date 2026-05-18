@@ -53,77 +53,116 @@ export default function Stock({ products, setProducts }) {
   };
 
   return (
-    <div>
-      <h1 className="page-title">Stock</h1>
+    <div className="page-shell">
+      <section className="module-panel">
+        <div className="list-toolbar" style={{ gridTemplateColumns: '1fr' }}>
+          <div>
+            <p className="section-kicker">Inventory</p>
+            <h3>Live stock control</h3>
+          </div>
+        </div>
 
-      {products.length === 0 && <p>No products available</p>}
+        {products.length === 0 && (
+          <div className="empty-state">
+            <h3>No products available</h3>
+            <p>Stock rows will appear once products are created.</p>
+          </div>
+        )}
 
-      {products.length > 0 && (
-        <table style={{ width: "100%", marginTop: "20px" }}>
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Product Name</th>
-              <th>Total Qty</th>
-              <th>Reserved Qty</th>
-              <th>Available Qty</th>
-              <th>Last Modified</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+        {products.length > 0 && (
+          <div className="table-card table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Product Name</th>
+                  <th>Total Qty</th>
+                  <th>Reserved Qty</th>
+                  <th>Available Qty</th>
+                  <th>Last Modified</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-          <tbody>
-            {products.map((product, index) => (
-              <tr key={product.id}>
-                <td>{index + 1}</td>
+              <tbody>
+                {products.map((product, index) => (
+                  <tr key={product.id}>
+                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{index + 1}</td>
 
-                <td>{product.name}</td>
+                    <td style={{ fontWeight: 600 }}>{product.name}</td>
 
-                {/* total qty editable only in edit mode */}
-                <td>
-                  {editingId === product.id ? (
-                    <input
-                      type="number"
-                      value={editedQty}
-                      onChange={(e) => setEditedQty(e.target.value)}
-                    />
-                  ) : (
-                    product.totalQty
-                  )}
-                </td>
+                    {/* total qty editable only in edit mode */}
+                    <td>
+                      {editingId === product.id ? (
+                        <input
+                          type="number"
+                          value={editedQty}
+                          onChange={(e) => setEditedQty(e.target.value)}
+                          style={{ width: '80px', padding: '0.35rem 0.5rem', fontSize: '0.88rem' }}
+                        />
+                      ) : (
+                        product.totalQty
+                      )}
+                    </td>
 
-                {/* read-only reserved */}
-                <td>{product.reservedQty}</td>
+                    {/* read-only reserved */}
+                    <td>{product.reservedQty}</td>
 
-                {/* read-only available */}
-                <td>{product.availableQty}</td>
+                    {/* read-only available */}
+                    <td>
+                      <span style={{
+                        color: (product.availableQty || 0) <= 5 ? '#8f2727' : 'inherit',
+                        fontWeight: (product.availableQty || 0) <= 5 ? 700 : 400,
+                      }}>
+                        {product.availableQty}
+                      </span>
+                    </td>
 
-                {/* last modified display */}
-                <td>
-                  {product.lastModified
-                    ? new Date(product.lastModified).toLocaleString()
-                    : "-"}
-                </td>
+                    {/* last modified display */}
+                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+                      {product.lastModified
+                        ? new Date(product.lastModified).toLocaleString()
+                        : "—"}
+                    </td>
 
-                <td>
-                  {editingId === product.id ? (
-                    <>
-                      <button onClick={() => handleUpdate(product.id)}>
-                        Save
-                      </button>
-                      <button onClick={handleCancel}>Cancel</button>
-                    </>
-                  ) : (
-                    <button onClick={() => handleEditClick(product)}>
-                      Edit
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                    <td>
+                      {editingId === product.id ? (
+                        <div className="button-row" style={{ gap: '0.4rem' }}>
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
+                            onClick={() => handleUpdate(product.id)}
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            className="ghost-button danger-button"
+                            style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
+                            onClick={handleCancel}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="ghost-button"
+                          style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
+                          onClick={() => handleEditClick(product)}
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
