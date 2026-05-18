@@ -14,6 +14,7 @@ import DeliveriesPage from "../pages/DeliveriesPage";
 import StockPage from "../pages/StockPage";
 import PaymentsPage from "../pages/PaymentsPage";
 import ProductsPage from "../pages/ProductsPage";
+import UsersPage from "../pages/UsersPage";
 
 export default function MainLayout({
   user,
@@ -112,6 +113,9 @@ export default function MainLayout({
           <NavItem to="/deliveries">Deliveries</NavItem>
           <NavItem to="/stock">Stock</NavItem>
           <NavItem to="/payments">Payments</NavItem>
+          {user?.role === "ADMIN" ? (
+            <NavItem to="/users">Users</NavItem>
+          ) : null}
         </nav>
 
         <div className="sidebar-footer">
@@ -234,6 +238,9 @@ export default function MainLayout({
               />
             }
           />
+          {user?.role === "ADMIN" ? (
+            <Route path="/users" element={<UsersPage />} />
+          ) : null}
         </Routes>
       </main>
     </div>
