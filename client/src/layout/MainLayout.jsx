@@ -16,6 +16,7 @@ import PaymentsPage from "../pages/PaymentsPage";
 import ProductsPage from "../pages/ProductsPage";
 import UsersPage from "../pages/UsersPage";
 import ReportsPage from "../pages/ReportsPage";
+import NotificationBell from "../components/NotificationBell";
 
 export default function MainLayout({
   user,
@@ -133,6 +134,9 @@ export default function MainLayout({
             <strong>{user?.username || "Admin"}</strong>
             <span>{user?.role || "ADMIN"}</span>
           </div>
+          {user?.role === "ADMIN" && (
+            <NotificationBell orders={orders} paymentDues={paymentDues} />
+          )}
           <button type="button" className="secondary-button" onClick={onLogout}>
             Logout
           </button>
