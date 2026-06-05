@@ -17,6 +17,7 @@ import ProductsPage from "../pages/ProductsPage";
 import UsersPage from "../pages/UsersPage";
 import ReportsPage from "../pages/ReportsPage";
 import NotificationBell from "../components/NotificationBell";
+import RemindersPage from "../pages/RemindersPage";
 
 export default function MainLayout({
   user,
@@ -66,6 +67,9 @@ export default function MainLayout({
     },
     "/users": {
       title: "Users",
+    },
+    "/reminders": {
+      title: "Reminders",
     },
   };
   const currentMeta = routeMeta[location.pathname] || routeMeta["/"];
@@ -255,6 +259,15 @@ export default function MainLayout({
           {user?.role === "ADMIN" ? (
             <>
               <Route path="/reports" element={<ReportsPage />} />
+              <Route
+                path="/reminders"
+                element={
+                  <RemindersPage
+                    paymentDues={paymentDues}
+                    isLoading={isAppLoading}
+                  />
+                }
+              />
               <Route path="/users" element={<UsersPage />} />
             </>
           ) : null}

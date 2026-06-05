@@ -19,6 +19,8 @@ import deliveryRoutes   from './routes/deliveryRoutes.js';
 import paymentRoutes    from './routes/paymentRoutes.js';   
 import ensureAdminUser  from './utils/bootstrapAdmin.js';
 import reportsRoutes from "./routes/reportsRoutes.js";
+import reminderRoutes from './routes/reminderRoutes.js';
+import { initCronJobs } from './utils/cronJobs.js';
 
 const app = express();
 
@@ -87,7 +89,8 @@ app.use('/api/orders',     orderRoutes);
 app.use('/api/stock',      stockRoutes);
 app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/payments',   paymentRoutes); 
-app.use("/api/reports", reportsRoutes);  
+app.use("/api/reports", reportsRoutes); 
+app.use('/api/reminders',reminderRoutes); 
 
 
 app.use(errorHandler);
@@ -104,6 +107,12 @@ const initializeServices = async () => {
     await ensureAdminUser();
   } catch (error) {
     console.error('Admin bootstrap failed:', error);
+  }
+
+  try {
+    initCronJobs();
+  } catch (error) {
+    console.error('Cron job initialization failed:', error);
   }
 };
 
