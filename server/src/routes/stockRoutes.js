@@ -1,4 +1,3 @@
-
 import express from 'express';
 import {
   getStockList,
@@ -13,15 +12,15 @@ const router = express.Router();
 
 
 router.use(authMiddleware);
-router.use(allowRoles('ADMIN'));
+// router.use(allowRoles('ADMIN'));
 
 
-router.get('/', getStockList);
+router.get('/',allowRoles('ADMIN', 'STAFF'), getStockList);
 
-router.get('/audit', getAuditLogs);
+router.get('/audit',allowRoles('ADMIN'), getAuditLogs);
 
-router.get('/:productId', getProductStock);
+router.get('/:productId',allowRoles('ADMIN', 'STAFF'), getProductStock);
 
-router.put('/:productId', updateTotalQty);
+router.put('/:productId', allowRoles('ADMIN'), updateTotalQty);
 
 export default router;

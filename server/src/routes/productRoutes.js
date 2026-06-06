@@ -14,18 +14,18 @@ import allowRoles from "../middlewares/rbacMiddleware.js";
 const router = express.Router();
 
 router.use(authMiddleware);
-router.use(allowRoles("ADMIN"));
+// router.use(allowRoles("ADMIN"));
 
-router.get("/active", getActiveProducts);
+router.get("/active",allowRoles('ADMIN', 'STAFF'), getActiveProducts);
 
-router.get("/", getAllProducts);
+router.get("/",allowRoles('ADMIN', 'STAFF'), getAllProducts);
 
-router.get("/:id", getProductById);
+router.get("/:id",allowRoles('ADMIN', 'STAFF'), getProductById);
 
-router.post("/", createProduct);
+router.post("/",allowRoles('ADMIN'), createProduct);
 
-router.put("/:id", updateProduct);
+router.put("/:id",allowRoles('ADMIN'), updateProduct);
 
-router.delete("/:id", deleteProduct);
+router.delete("/:id",allowRoles('ADMIN'), deleteProduct);
 
 export default router;

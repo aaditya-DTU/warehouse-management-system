@@ -119,18 +119,23 @@ export default function MainLayout({
           >
             Dashboard
           </button>
-          <NavItem to="/customers">Customers</NavItem>
-          <NavItem to="/products">Products</NavItem>
-          <NavItem to="/orders">Orders</NavItem>
+          {user?.role === "ADMIN" && (
+            <>
+              <NavItem to="/customers">Customers</NavItem>
+              <NavItem to="/products">Products</NavItem>
+              <NavItem to="/orders">Orders</NavItem>
+            </>
+          )}
           <NavItem to="/deliveries">Deliveries</NavItem>
           <NavItem to="/stock">Stock</NavItem>
           <NavItem to="/payments">Payments</NavItem>
-          {user?.role === "ADMIN" ? (
+          {user?.role === "ADMIN" && (
             <>
               <NavItem to="/reports">Reports</NavItem>
+              <NavItem to="/reminders">Reminders</NavItem>
               <NavItem to="/users">Users</NavItem>
             </>
-          ) : null}
+          )}
         </nav>
 
         <div className="sidebar-footer">

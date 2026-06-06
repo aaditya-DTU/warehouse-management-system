@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { formatCurrency, formatDateTime, formatStatusLabel } from "../utils/formatters";
+import {
+  formatCurrency,
+  formatDateTime,
+  formatStatusLabel,
+} from "../utils/formatters";
 
 export default function RemindersPage({ paymentDues, isLoading }) {
   const [logs, setLogs] = useState([]);
@@ -16,7 +20,7 @@ export default function RemindersPage({ paymentDues, isLoading }) {
   const [filterChannel, setFilterChannel] = useState("");
 
   const unpaidDues = (paymentDues || []).filter(
-    (d) => d.paymentStatus !== "FULLY_PAID"
+    (d) => d.paymentStatus !== "FULLY_PAID",
   );
 
   const loadData = async () => {
@@ -39,7 +43,9 @@ export default function RemindersPage({ paymentDues, isLoading }) {
     }
   };
 
-  useEffect(() => { loadData(); }, [filterStatus, filterChannel]);
+  useEffect(() => {
+    loadData();
+  }, [filterStatus, filterChannel]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -59,7 +65,9 @@ export default function RemindersPage({ paymentDues, isLoading }) {
       setSelectedDueId("");
       loadData();
     } catch (err) {
-      setErrorMessage(err.response?.data?.message || "Failed to send reminder.");
+      setErrorMessage(
+        err.response?.data?.message || "Failed to send reminder.",
+      );
     } finally {
       setIsSending(false);
     }
@@ -73,7 +81,7 @@ export default function RemindersPage({ paymentDues, isLoading }) {
       const res = await api.post("/reminders/run-cron");
       const { sent, failed, skipped } = res.data.results;
       setSuccessMessage(
-        `Batch complete — ${sent} sent, ${skipped} skipped (already sent today), ${failed} failed.`
+        `Batch complete — ${sent} sent, ${skipped} skipped (already sent today), ${failed} failed.`,
       );
       loadData();
     } catch (err) {
@@ -128,7 +136,10 @@ export default function RemindersPage({ paymentDues, isLoading }) {
 
           <label className="form-field">
             <span>Channel</span>
-            <select value={channel} onChange={(e) => setChannel(e.target.value)}>
+            <select
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+            >
               <option value="SMS">SMS</option>
               <option value="WHATSAPP">WhatsApp</option>
             </select>
@@ -142,12 +153,22 @@ export default function RemindersPage({ paymentDues, isLoading }) {
               {(() => {
                 const due = unpaidDues.find((d) => d._id === selectedDueId);
                 if (!due) return null;
-                const balance = Number(due.balanceAmount).toLocaleString("en-IN");
+                const balance = Number(due.balanceAmount).toLocaleString(
+                  "en-IN",
+                );
                 return (
-                  <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", margin: 0, lineHeight: 1.6 }}>
-                    Dear {due.customerName}, this is a payment reminder for order{" "}
-                    {due.orderNo}. An amount of ₹{balance} is pending. Please
-                    arrange payment at your earliest convenience. Thank you.
+                  <p
+                    style={{
+                      fontSize: "0.88rem",
+                      color: "var(--text-secondary)",
+                      margin: 0,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    Dear {due.customerName}, this is a payment reminder for
+                    order {due.orderNo}. An amount of ₹{balance} is pending.
+                    Please arrange payment at your earliest convenience. Thank
+                    you.
                   </p>
                 );
               })()}
@@ -176,10 +197,16 @@ export default function RemindersPage({ paymentDues, isLoading }) {
             </button>
           </div>
 
-          <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", margin: "0.5rem 0 0" }}>
-            "Run batch now" sends SMS reminders to all dues older than{" "}
-            {process.env.REMINDER_GRACE_DAYS || 3} days that haven't been
-            reminded today. The cron also runs automatically at 9 AM IST daily.
+          <p
+            style={{
+              fontSize: "0.78rem",
+              color: "var(--text-secondary)",
+              margin: "0.5rem 0 0",
+            }}
+          >
+            "Run batch now" sends SMS reminders to all dues older than 3 days
+            that haven't been reminded today. The cron also runs automatically
+            at 9 AM IST daily.
           </p>
         </form>
       </section>
@@ -225,7 +252,9 @@ export default function RemindersPage({ paymentDues, isLoading }) {
         ) : logs.length === 0 ? (
           <div className="empty-state">
             <h3>No reminders sent yet</h3>
-            <p>Send your first reminder above or wait for the daily cron at 9 AM.</p>
+            <p>
+              Send your first reminder above or wait for the daily cron at 9 AM.
+            </p>
           </div>
         ) : (
           <div className="table-card table-scroll">
@@ -247,7 +276,12 @@ export default function RemindersPage({ paymentDues, isLoading }) {
                   <tr key={log._id}>
                     <td style={{ fontWeight: 600 }}>{log.orderNo}</td>
                     <td>{log.customerName}</td>
-                    <td style={{ color: "var(--text-secondary)", fontSize: "0.82rem" }}>
+                    <td
+                      style={{
+                        color: "var(--text-secondary)",
+                        fontSize: "0.82rem",
+                      }}
+                    >
                       {log.customerMobile}
                     </td>
                     <td>
@@ -273,10 +307,20 @@ export default function RemindersPage({ paymentDues, isLoading }) {
                         {log.status}
                       </span>
                     </td>
-                    <td style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>
+                    <td
+                      style={{
+                        fontSize: "0.78rem",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
                       {formatStatusLabel(log.triggeredBy)}
                     </td>
-                    <td style={{ fontSize: "0.82rem", color: "var(--text-secondary)" }}>
+                    <td
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
                       {formatDateTime(log.sentAt)}
                     </td>
                   </tr>
