@@ -9,7 +9,7 @@ import {
 let lineItemSequence = 0;
 
 const createLineItem = () => ({
-  id: `line-item-${lineItemSequence += 1}`,
+  id: `line-item-${(lineItemSequence += 1)}`,
   productId: "",
   quantity: 1,
   rate: "",
@@ -41,9 +41,11 @@ export default function OrdersPage({
     firstFieldRef.current?.focus();
   }, []);
 
-  const activeCustomers = customers.filter((customer) => customer.isActive);
-  const activeProducts = products.filter((product) => product.isActive);
-  const stockLookup = Object.fromEntries(stockItems.map((item) => [item.productId, item]));
+  const activeCustomers = (customers || []).filter((c) => c.isActive !== false);
+  const activeProducts = (products || []).filter((p) => p.isActive !== false);
+  const stockLookup = Object.fromEntries(
+  (stockItems || []).map((item) => [item.productId, item])
+);
 
   const orderAmount = useMemo(
     () =>
@@ -71,7 +73,9 @@ export default function OrdersPage({
 
   const handleCustomerChange = (nextCustomerId) => {
     setCustomerId(nextCustomerId);
-    const customer = activeCustomers.find((entry) => entry._id === nextCustomerId);
+    const customer = activeCustomers.find(
+      (entry) => entry._id === nextCustomerId,
+    );
     setDeliveryAddress(customer?.address || "");
   };
 
@@ -112,10 +116,14 @@ export default function OrdersPage({
     setErrorMessage("");
     setSuccessMessage("");
 
-    const validItems = items.filter((item) => item.productId && Number(item.quantity) > 0);
+    const validItems = items.filter(
+      (item) => item.productId && Number(item.quantity) > 0,
+    );
 
     if (!customerId || !deliveryAddress.trim() || !deliveryDate) {
-      setErrorMessage("Customer, delivery address, and delivery date are required.");
+      setErrorMessage(
+        "Customer, delivery address, and delivery date are required.",
+      );
       return;
     }
 
@@ -308,7 +316,9 @@ export default function OrdersPage({
           </div>
 
           {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
-          {successMessage ? <p className="form-success">{successMessage}</p> : null}
+          {successMessage ? (
+            <p className="form-success">{successMessage}</p>
+          ) : null}
 
           <button type="submit" className="primary-button" disabled={isSaving}>
             {isSaving ? "Saving order..." : "Create order"}
@@ -343,7 +353,11 @@ export default function OrdersPage({
         {!isLoading && !filteredOrders.length ? (
           <div className="empty-state">
             <h3>No orders to display</h3>
-            <p>{searchText ? "Try a different search." : "Create the first order."}</p>
+            <p>
+              {searchText
+                ? "Try a different search."
+                : "Create the first order."}
+            </p>
           </div>
         ) : null}
 
@@ -362,7 +376,8 @@ export default function OrdersPage({
                     <div>
                       <strong>{order.orderNo}</strong>
                       <p>
-                        {order.customerName} · Delivery {formatDate(order.deliveryDate)}
+                        {order.customerName} · Delivery{" "}
+                        {formatDate(order.deliveryDate)}
                       </p>
                     </div>
                     <span className={`badge-${status.toLowerCase()}`}>

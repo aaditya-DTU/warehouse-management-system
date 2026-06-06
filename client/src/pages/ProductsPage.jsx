@@ -6,6 +6,7 @@ const initialForm = {
   productName: "",
   unit: "",
   defaultRate: "",
+  totalQty: "",
   isActive: true,
 };
 
@@ -51,15 +52,25 @@ export default function ProductsPage({
     setErrorMessage("");
     setSuccessMessage("");
 
-    if (!formData.productName.trim() || !formData.unit || formData.defaultRate === "") {
+    if (
+      !formData.productName.trim() ||
+      !formData.unit ||
+      formData.defaultRate === ""
+    ) {
       setErrorMessage("Product name, unit, and default rate are required.");
       return;
     }
 
     const numericRate = Number(formData.defaultRate);
+    const numericQty = formData.totalQty === "" ? 0 : Number(formData.totalQty);
 
     if (Number.isNaN(numericRate) || numericRate < 0) {
       setErrorMessage("Default rate must be a valid non-negative number.");
+      return;
+    }
+
+    if (Number.isNaN(numericQty) || numericQty < 0) {
+      setErrorMessage("Total stock must be 0 or more.");
       return;
     }
 
@@ -70,6 +81,7 @@ export default function ProductsPage({
         productName: formData.productName.trim(),
         unit: formData.unit,
         defaultRate: numericRate,
+        totalQty: numericQty,
         isActive: formData.isActive,
       });
 
@@ -146,7 +158,38 @@ export default function ProductsPage({
             />
           </label>
 
-          <label className="toggle-row">
+          <div className="two-column-grid">
+            <label className="form-field">
+              <span>Total stock (opening qty)</span>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={formData.totalQty}
+                onChange={(event) =>
+                  setFormData((current) => ({
+                    ...current,
+                    totalQty: event.target.value,
+                  }))
+                }
+                placeholder="0"
+              />
+            </label>
+
+            <label className="form-field">
+              <span>Available stock</span>
+              <input
+                readOnly
+                value={
+                  formData.totalQty !== ""
+                    ? `${Number(formData.totalQty)} (no reservations yet)`
+                    : "—"
+                }
+              />
+            </label>
+          </div>
+
+          {/* <label className="toggle-row">
             <input
               type="checkbox"
               checked={formData.isActive}
@@ -158,10 +201,12 @@ export default function ProductsPage({
               }
             />
             <span>Keep product active for ordering</span>
-          </label>
+          </label> */}
 
           {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
-          {successMessage ? <p className="form-success">{successMessage}</p> : null}
+          {successMessage ? (
+            <p className="form-success">{successMessage}</p>
+          ) : null}
 
           <button type="submit" className="primary-button" disabled={isSaving}>
             {isSaving ? "Saving product..." : "Add product"}
@@ -189,7 +234,9 @@ export default function ProductsPage({
         {isLoading ? (
           <div className="empty-state">
             <h3>Loading products...</h3>
-            <p>Pulling product master and stock information from the backend.</p>
+            <p>
+              Pulling product master and stock information from the backend.
+            </p>
           </div>
         ) : null}
 
@@ -215,7 +262,8 @@ export default function ProductsPage({
                     <div>
                       <strong>{product.productName}</strong>
                       <p>
-                        {product.unit} unit · Created {formatDate(product.createdAt)}
+                        {product.unit} unit · Created{" "}
+                        {formatDate(product.createdAt)}
                       </p>
                     </div>
                     <span

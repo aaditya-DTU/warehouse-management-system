@@ -142,14 +142,14 @@ function Customers({ customers, setCustomers, isLoading, refreshCustomers }) {
             />
           </label>
 
-          <label className="toggle-row">
+          {/* <label className="toggle-row">
             <input
               type="checkbox"
               checked={formData.isActive}
               onChange={(event) => handleChange("isActive", event.target.checked)}
             />
             <span>Mark customer as active</span>
-          </label>
+          </label> */}
 
           {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
           {successMessage ? <p className="form-success">{successMessage}</p> : null}

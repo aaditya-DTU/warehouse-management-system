@@ -1,5 +1,3 @@
-
-
 import Product from "../models/Product.js";
 
 
@@ -75,7 +73,7 @@ export const getProductById = async (req, res, next) => {
 
 export const createProduct = async (req, res, next) => {
   try {
-    const { productName, unit, defaultRate, isActive } = req.body;
+    const { productName, unit, defaultRate, isActive, totalQty } = req.body;
 
 
     if (!productName || !unit || defaultRate === undefined) {
@@ -111,7 +109,7 @@ export const createProduct = async (req, res, next) => {
       unit,
       defaultRate,
       isActive: isActive !== undefined ? isActive : true,
-      totalQty: 0, 
+      totalQty: typeof totalQty === "number" && totalQty >= 0 ? totalQty : 0, 
     });
 
     res.status(201).json({
