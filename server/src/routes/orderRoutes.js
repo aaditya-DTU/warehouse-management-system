@@ -20,17 +20,19 @@ router.get(
   allowRoles("ADMIN", "STAFF"),
   getPendingDeliveries,
 );
-
+ 
 router.get("/stock-summary", allowRoles("ADMIN"), getStockSummaryForOrder);
-
-router.get("/", allowRoles("ADMIN"), getAllOrders);
-
+ 
+// STAFF needs read access here too — App.jsx's global `orders` state (used by
+// DeliveriesPage's pending-order dropdown) is populated from this endpoint.
+router.get("/", allowRoles("ADMIN", "STAFF"), getAllOrders);
+ 
 router.get("/:id", allowRoles("ADMIN", "STAFF"), getOrderById);
-
+ 
 router.post("/", allowRoles("ADMIN"), createOrder);
-
+ 
 router.put("/:id", allowRoles("ADMIN"), updateOrder);
-
+ 
 router.delete("/:id", allowRoles("ADMIN"), deleteOrder);
 
 export default router;

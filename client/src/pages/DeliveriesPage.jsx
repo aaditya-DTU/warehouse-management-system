@@ -178,6 +178,7 @@ export default function DeliveriesPage({
                 <option value="DELIVERED">Delivered</option>
                 <option value="NOT_DELIVERED">Not delivered</option>
                 <option value="CANCELLED">Cancelled</option>
+                {/* <option value="OUT_FOR_DELIVERY">Out for delivery</option> */}
               </select>
             </label>
           </div>

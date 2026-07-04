@@ -16,8 +16,6 @@ import PaymentsPage from "../pages/PaymentsPage";
 import ProductsPage from "../pages/ProductsPage";
 import UsersPage from "../pages/UsersPage";
 import ReportsPage from "../pages/ReportsPage";
-import NotificationBell from "../components/NotificationBell";
-import RemindersPage from "../pages/RemindersPage";
 
 export default function MainLayout({
   user,
@@ -68,9 +66,6 @@ export default function MainLayout({
     "/users": {
       title: "Users",
     },
-    "/reminders": {
-      title: "Reminders",
-    },
   };
   const currentMeta = routeMeta[location.pathname] || routeMeta["/"];
   const isDashboardRoute = location.pathname === "/";
@@ -119,23 +114,18 @@ export default function MainLayout({
           >
             Dashboard
           </button>
-          {user?.role === "ADMIN" && (
-            <>
-              <NavItem to="/customers">Customers</NavItem>
-              <NavItem to="/products">Products</NavItem>
-              <NavItem to="/orders">Orders</NavItem>
-            </>
-          )}
+          <NavItem to="/customers">Customers</NavItem>
+          <NavItem to="/products">Products</NavItem>
+          <NavItem to="/orders">Orders</NavItem>
           <NavItem to="/deliveries">Deliveries</NavItem>
           <NavItem to="/stock">Stock</NavItem>
           <NavItem to="/payments">Payments</NavItem>
-          {user?.role === "ADMIN" && (
+          {user?.role === "ADMIN" ? (
             <>
               <NavItem to="/reports">Reports</NavItem>
-              <NavItem to="/reminders">Reminders</NavItem>
               <NavItem to="/users">Users</NavItem>
             </>
-          )}
+          ) : null}
         </nav>
 
         <div className="sidebar-footer">
@@ -143,9 +133,6 @@ export default function MainLayout({
             <strong>{user?.username || "Admin"}</strong>
             <span>{user?.role || "ADMIN"}</span>
           </div>
-          {user?.role === "ADMIN" && (
-            <NotificationBell orders={orders} paymentDues={paymentDues} />
-          )}
           <button type="button" className="secondary-button" onClick={onLogout}>
             Logout
           </button>
@@ -197,6 +184,7 @@ export default function MainLayout({
                 setCustomers={setCustomers}
                 isLoading={isAppLoading}
                 refreshCustomers={refreshCustomers}
+                user={user}
               />
             }
           />
@@ -209,6 +197,7 @@ export default function MainLayout({
                 isLoading={isAppLoading}
                 refreshProducts={refreshProducts}
                 refreshStockItems={refreshStockItems}
+                user={user}
               />
             }
           />
@@ -223,6 +212,7 @@ export default function MainLayout({
                 stockItems={stockItems}
                 refreshOrders={refreshOrders}
                 refreshStockItems={refreshStockItems}
+                user={user}
               />
             }
           />
@@ -248,6 +238,7 @@ export default function MainLayout({
                 stockItems={stockItems}
                 refreshStockItems={refreshStockItems}
                 refreshProducts={refreshProducts}
+                user={user}
               />
             }
           />
@@ -264,15 +255,6 @@ export default function MainLayout({
           {user?.role === "ADMIN" ? (
             <>
               <Route path="/reports" element={<ReportsPage />} />
-              <Route
-                path="/reminders"
-                element={
-                  <RemindersPage
-                    paymentDues={paymentDues}
-                    isLoading={isAppLoading}
-                  />
-                }
-              />
               <Route path="/users" element={<UsersPage />} />
             </>
           ) : null}

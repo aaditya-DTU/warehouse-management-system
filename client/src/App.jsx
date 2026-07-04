@@ -108,27 +108,32 @@ function App() {
       return;
     }
 
+    // Wraps each individual data load so that one endpoint returning a 403
+    // (e.g. a role that isn't permitted on that particular resource) doesn't
+    // wipe out every other successfully-loaded section of the app. Failures
+    // are logged for debugging but do not block the rest of the UI.
+    const tryLoad = async (loader, label) => {
+      try {
+        await loader();
+      } catch (error) {
+        console.error(`Unable to load ${label}:`, error.response?.data?.message || error.message);
+      }
+    };
+
     const loadAppData = async () => {
       setIsAppLoading(true);
       setAppError("");
 
-      try {
-        await Promise.all([
-          loadCustomers(),
-          loadProducts(),
-          loadOrders(),
-          loadDeliveries(),
-          loadPaymentDues(),
-          loadStockItems(),
-        ]);
-      } catch (error) {
-        setAppError(
-          error.response?.data?.message ||
-            "Unable to load dashboard data. Please confirm the backend is running.",
-        );
-      } finally {
-        setIsAppLoading(false);
-      }
+      await Promise.all([
+        tryLoad(loadCustomers, "customers"),
+        tryLoad(loadProducts, "products"),
+        tryLoad(loadOrders, "orders"),
+        tryLoad(loadDeliveries, "deliveries"),
+        tryLoad(loadPaymentDues, "payment dues"),
+        tryLoad(loadStockItems, "stock items"),
+      ]);
+
+      setIsAppLoading(false);
     };
 
     loadAppData();

@@ -25,6 +25,50 @@ function Customers({ customers, setCustomers, isLoading, refreshCustomers }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  const handleEditStart = (customer) => {
+    setEditingId(customer._id);
+    setEditForm({
+      customerName: customer.customerName,
+      mobileNumber: customer.mobileNumber,
+      email: customer.email || "",
+      address: customer.address,
+    });
+    setEditError("");
+  };
+
+  const handleEditSave = async (customerId) => {
+    if (!editForm.customerName?.trim() || !editForm.mobileNumber?.trim()) {
+      setEditError("Name and mobile are required.");
+      return;
+    }
+    setIsEditing(true);
+    try {
+      await api.put(`/customers/${customerId}`, {
+        customerName: editForm.customerName.trim(),
+        mobileNumber: editForm.mobileNumber.trim(),
+        email: editForm.email.trim(),
+        address: editForm.address.trim(),
+      });
+      await refreshCustomers();
+      setEditingId(null);
+      setEditError("");
+    } catch (err) {
+      setEditError(err.response?.data?.message || "Failed to update customer.");
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditError("");
+  };
+
   useEffect(() => {
     firstInputRef.current?.focus();
   }, []);
@@ -37,7 +81,12 @@ function Customers({ customers, setCustomers, isLoading, refreshCustomers }) {
     }
 
     return customers.filter((customer) =>
-      [customer.customerName, customer.mobileNumber, customer.email, customer.address]
+      [
+        customer.customerName,
+        customer.mobileNumber,
+        customer.email,
+        customer.address,
+      ]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(query)),
     );
@@ -60,7 +109,9 @@ function Customers({ customers, setCustomers, isLoading, refreshCustomers }) {
       !formData.mobileNumber.trim() ||
       !formData.address.trim()
     ) {
-      setErrorMessage("Customer name, mobile number, and address are required.");
+      setErrorMessage(
+        "Customer name, mobile number, and address are required.",
+      );
       return;
     }
 
@@ -76,7 +127,10 @@ function Customers({ customers, setCustomers, isLoading, refreshCustomers }) {
       };
 
       const response = await api.post("/customers", payload);
-      setCustomers((current) => [normalizeCustomer(response.data.customer), ...current]);
+      setCustomers((current) => [
+        normalizeCustomer(response.data.customer),
+        ...current,
+      ]);
       await refreshCustomers();
       setFormData(initialForm);
       setSuccessMessage("Customer created successfully.");
@@ -152,7 +206,9 @@ function Customers({ customers, setCustomers, isLoading, refreshCustomers }) {
           </label> */}
 
           {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
-          {successMessage ? <p className="form-success">{successMessage}</p> : null}
+          {successMessage ? (
+            <p className="form-success">{successMessage}</p>
+          ) : null}
 
           <button type="submit" className="primary-button" disabled={isSaving}>
             {isSaving ? "Saving customer..." : "Add customer"}
@@ -206,30 +262,116 @@ function Customers({ customers, setCustomers, isLoading, refreshCustomers }) {
           <div className="customer-list">
             {filteredCustomers.map((customer) => (
               <article key={customer._id} className="customer-card">
-                <div className="card-row">
-                  <div>
-                    <strong>{customer.customerName}</strong>
-                    <p>{customer.address}</p>
+                {editingId === customer._id ? (
+                  // ── Edit mode ──
+                  <div style={{ display: "grid", gap: "0.75rem" }}>
+                    <label className="form-field" style={{ marginBottom: 0 }}>
+                      <span>Customer name</span>
+                      <input
+                        value={editForm.customerName}
+                        onChange={(e) =>
+                          setEditForm((f) => ({
+                            ...f,
+                            customerName: e.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="form-field" style={{ marginBottom: 0 }}>
+                      <span>Mobile</span>
+                      <input
+                        value={editForm.mobileNumber}
+                        onChange={(e) =>
+                          setEditForm((f) => ({
+                            ...f,
+                            mobileNumber: e.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="form-field" style={{ marginBottom: 0 }}>
+                      <span>Email</span>
+                      <input
+                        value={editForm.email}
+                        onChange={(e) =>
+                          setEditForm((f) => ({ ...f, email: e.target.value }))
+                        }
+                      />
+                    </label>
+                    <label className="form-field" style={{ marginBottom: 0 }}>
+                      <span>Address</span>
+                      <textarea
+                        rows="2"
+                        value={editForm.address}
+                        onChange={(e) =>
+                          setEditForm((f) => ({
+                            ...f,
+                            address: e.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    {editError && (
+                      <p className="form-error" style={{ margin: 0 }}>
+                        {editError}
+                      </p>
+                    )}
+                    <div className="button-row">
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{ flex: 1 }}
+                        disabled={isEditing}
+                        onClick={() => handleEditSave(customer._id)}
+                      >
+                        {isEditing ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        type="button"
+                        className="ghost-button"
+                        onClick={handleEditCancel}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                  <span
-                    className={
-                      customer.isActive ? "badge-active" : "badge-inactive"
-                    }
-                  >
-                    {customer.isActive ? "Active" : "Inactive"}
-                  </span>
-                </div>
-
-                <div className="info-grid">
-                  <div>
-                    <span className="info-label">Mobile</span>
-                    <p>{customer.mobileNumber}</p>
-                  </div>
-                  <div>
-                    <span className="info-label">Email</span>
-                    <p>{customer.email || "Not provided"}</p>
-                  </div>
-                </div>
+                ) : (
+                  // ── View mode ──
+                  <>
+                    <div className="card-row">
+                      <div>
+                        <strong>{customer.customerName}</strong>
+                        <p>{customer.address}</p>
+                      </div>
+                      <span
+                        className={
+                          customer.isActive ? "badge-active" : "badge-inactive"
+                        }
+                      >
+                        {customer.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    <div className="info-grid">
+                      <div>
+                        <span className="info-label">Mobile</span>
+                        <p>{customer.mobileNumber}</p>
+                      </div>
+                      <div>
+                        <span className="info-label">Email</span>
+                        <p>{customer.email || "Not provided"}</p>
+                      </div>
+                    </div>
+                    <div className="list-divider" />
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      style={{ width: "100%", justifyContent: "center" }}
+                      onClick={() => handleEditStart(customer)}
+                    >
+                      Edit customer
+                    </button>
+                  </>
+                )}
               </article>
             ))}
           </div>

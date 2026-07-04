@@ -7,7 +7,9 @@ export default function StockPage({
   stockItems,
   refreshStockItems,
   refreshProducts,
+  user,
 }) {
+  const isAdmin = user?.role === "ADMIN";
   const editInputRef = useRef(null);
   const [editingId, setEditingId] = useState("");
   const [editedQty, setEditedQty] = useState("");
@@ -24,6 +26,12 @@ export default function StockPage({
   };
 
   useEffect(() => {
+    // Audit trail is an ADMIN-only endpoint — skip the call entirely for
+    // STAFF instead of firing a request that will 403.
+    if (!isAdmin) {
+      return;
+    }
+
     const loadAuditLogs = async () => {
       try {
         const response = await api.get("/stock/audit");
@@ -36,7 +44,7 @@ export default function StockPage({
     };
 
     loadAuditLogs();
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     if (editingId) {
@@ -79,12 +87,17 @@ export default function StockPage({
       resetEditState();
 
       try {
-        const [, auditResponse] = await Promise.all([
-          refreshStockItems(),
-          api.get("/stock/audit"),
-          refreshProducts(),
-        ]);
-        setAuditLogs(auditResponse.data.logs || []);
+        const refreshTasks = [refreshStockItems(), refreshProducts()];
+        if (isAdmin) {
+          refreshTasks.push(api.get("/stock/audit"));
+        }
+
+        const results = await Promise.all(refreshTasks);
+
+        if (isAdmin) {
+          const auditResponse = results[2];
+          setAuditLogs(auditResponse.data.logs || []);
+        }
       } catch {
         setUpdateError(
           "Stock was updated, but the latest stock view could not be refreshed automatically.",
@@ -137,7 +150,7 @@ export default function StockPage({
                   <th>Available</th>
                   <th>Last Modified</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  {isAdmin ? <th>Action</th> : null}
                 </tr>
               </thead>
 
@@ -171,36 +184,38 @@ export default function StockPage({
                         {product.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td>
-                      {editingId === product.productId ? (
-                        <div className="button-row">
+                    {isAdmin ? (
+                      <td>
+                        {editingId === product.productId ? (
+                          <div className="button-row">
+                            <button
+                              type="button"
+                              className="ghost-button"
+                              onClick={handleUpdate}
+                              disabled={isUpdating}
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              className="ghost-button danger-button"
+                              onClick={handleCancelEdit}
+                              disabled={isUpdating}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
                           <button
                             type="button"
                             className="ghost-button"
-                            onClick={handleUpdate}
-                            disabled={isUpdating}
+                            onClick={() => handleEditClick(product)}
                           >
-                            Save
+                            Edit
                           </button>
-                          <button
-                            type="button"
-                            className="ghost-button danger-button"
-                            onClick={handleCancelEdit}
-                            disabled={isUpdating}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          className="ghost-button"
-                          onClick={() => handleEditClick(product)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </td>
+                        )}
+                      </td>
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
@@ -209,48 +224,50 @@ export default function StockPage({
         ) : null}
       </section>
 
-      <section className="module-panel">
-        <div className="list-toolbar">
-          <div>
-            <p className="section-kicker">Audit trail</p>
-            <h3>Recent stock changes</h3>
+      {isAdmin ? (
+        <section className="module-panel">
+          <div className="list-toolbar">
+            <div>
+              <p className="section-kicker">Audit trail</p>
+              <h3>Recent stock changes</h3>
+            </div>
           </div>
-        </div>
 
-        {auditError ? <p className="form-error">{auditError}</p> : null}
+          {auditError ? <p className="form-error">{auditError}</p> : null}
 
-        {!auditLogs.length ? (
-          <div className="empty-state">
-            <h3>No stock changes recorded yet</h3>
-            <p>Audit rows will appear after the first stock adjustment.</p>
-          </div>
-        ) : (
-          <div className="table-card table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Old Qty</th>
-                  <th>New Qty</th>
-                  <th>Changed By</th>
-                  <th>Changed At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {auditLogs.map((log) => (
-                  <tr key={log._id}>
-                    <td>{log.productName}</td>
-                    <td>{log.oldTotalQty}</td>
-                    <td>{log.newTotalQty}</td>
-                    <td>{log.changedByUsername}</td>
-                    <td>{formatDateTime(log.changedAt)}</td>
+          {!auditLogs.length ? (
+            <div className="empty-state">
+              <h3>No stock changes recorded yet</h3>
+              <p>Audit rows will appear after the first stock adjustment.</p>
+            </div>
+          ) : (
+            <div className="table-card table-scroll">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Old Qty</th>
+                    <th>New Qty</th>
+                    <th>Changed By</th>
+                    <th>Changed At</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                </thead>
+                <tbody>
+                  {auditLogs.map((log) => (
+                    <tr key={log._id}>
+                      <td>{log.productName}</td>
+                      <td>{log.oldTotalQty}</td>
+                      <td>{log.newTotalQty}</td>
+                      <td>{log.changedByUsername}</td>
+                      <td>{formatDateTime(log.changedAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ) : null}
     </div>
   );
 }

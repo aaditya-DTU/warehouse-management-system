@@ -24,6 +24,45 @@ export default function ProductsPage({
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editProductForm, setEditProductForm] = useState({});
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [editProductError, setEditProductError] = useState("");
+
+  const handleProductEditStart = (product) => {
+    setEditingProductId(product._id);
+    setEditProductForm({
+      productName: product.productName,
+      unit: product.unit,
+      defaultRate: product.defaultRate,
+    });
+    setEditProductError("");
+  };
+
+  const handleProductEditSave = async (productId) => {
+    if (!editProductForm.productName?.trim() || !editProductForm.unit) {
+      setEditProductError("Name and unit are required.");
+      return;
+    }
+    setIsSavingProduct(true);
+    try {
+      await api.put(`/products/${productId}`, {
+        productName: editProductForm.productName.trim(),
+        unit: editProductForm.unit,
+        defaultRate: Number(editProductForm.defaultRate),
+      });
+      await Promise.all([refreshProducts(), refreshStockItems()]);
+      setEditingProductId(null);
+      setEditProductError("");
+    } catch (err) {
+      setEditProductError(
+        err.response?.data?.message || "Failed to update product.",
+      );
+    } finally {
+      setIsSavingProduct(false);
+    }
+  };
+
   useEffect(() => {
     firstInputRef.current?.focus();
   }, []);
@@ -258,47 +297,140 @@ export default function ProductsPage({
 
               return (
                 <article key={product._id} className="entity-card">
-                  <div className="card-row">
-                    <div>
-                      <strong>{product.productName}</strong>
-                      <p>
-                        {product.unit} unit · Created{" "}
-                        {formatDate(product.createdAt)}
-                      </p>
+                  {editingProductId === product._id ? (
+                    <div style={{ display: "grid", gap: "0.75rem" }}>
+                      <label className="form-field" style={{ marginBottom: 0 }}>
+                        <span>Product name</span>
+                        <input
+                          value={editProductForm.productName}
+                          onChange={(e) =>
+                            setEditProductForm((f) => ({
+                              ...f,
+                              productName: e.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                      <div className="two-column-grid">
+                        <label
+                          className="form-field"
+                          style={{ marginBottom: 0 }}
+                        >
+                          <span>Unit</span>
+                          <select
+                            value={editProductForm.unit}
+                            onChange={(e) =>
+                              setEditProductForm((f) => ({
+                                ...f,
+                                unit: e.target.value,
+                              }))
+                            }
+                          >
+                            <option value="kg">kg</option>
+                            <option value="litre">litre</option>
+                            <option value="piece">piece</option>
+                            <option value="box">box</option>
+                          </select>
+                        </label>
+                        <label
+                          className="form-field"
+                          style={{ marginBottom: 0 }}
+                        >
+                          <span>Default rate</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={editProductForm.defaultRate}
+                            onChange={(e) =>
+                              setEditProductForm((f) => ({
+                                ...f,
+                                defaultRate: e.target.value,
+                              }))
+                            }
+                          />
+                        </label>
+                      </div>
+                      {editProductError && (
+                        <p className="form-error" style={{ margin: 0 }}>
+                          {editProductError}
+                        </p>
+                      )}
+                      <div className="button-row">
+                        <button
+                          type="button"
+                          className="primary-button"
+                          style={{ flex: 1 }}
+                          disabled={isSavingProduct}
+                          onClick={() => handleProductEditSave(product._id)}
+                        >
+                          {isSavingProduct ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          className="ghost-button"
+                          onClick={() => {
+                            setEditingProductId(null);
+                            setEditProductError("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                    <span
-                      className={
-                        product.isActive ? "badge-active" : "badge-inactive"
-                      }
-                    >
-                      {product.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
-
-                  <div className="info-grid">
-                    <div>
-                      <span className="info-label">Default rate</span>
-                      <p>{formatCurrency(product.defaultRate)}</p>
-                    </div>
-                    <div>
-                      <span className="info-label">Available stock</span>
-                      <p>
-                        {stock.availableQty ?? 0} {product.unit}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="info-label">Reserved stock</span>
-                      <p>
-                        {stock.reservedQty ?? 0} {product.unit}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="info-label">Total stock</span>
-                      <p>
-                        {stock.totalQty ?? product.totalQty ?? 0} {product.unit}
-                      </p>
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="card-row">
+                        <div>
+                          <strong>{product.productName}</strong>
+                          <p>
+                            {product.unit} unit · Created{" "}
+                            {formatDate(product.createdAt)}
+                          </p>
+                        </div>
+                        <span
+                          className={
+                            product.isActive ? "badge-active" : "badge-inactive"
+                          }
+                        >
+                          {product.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                      <div className="info-grid">
+                        <div>
+                          <span className="info-label">Default rate</span>
+                          <p>{formatCurrency(product.defaultRate)}</p>
+                        </div>
+                        <div>
+                          <span className="info-label">Available stock</span>
+                          <p>
+                            {stock.availableQty ?? 0} {product.unit}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="info-label">Reserved stock</span>
+                          <p>
+                            {stock.reservedQty ?? 0} {product.unit}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="info-label">Total stock</span>
+                          <p>
+                            {stock.totalQty ?? product.totalQty ?? 0}{" "}
+                            {product.unit}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="list-divider" />
+                      <button
+                        type="button"
+                        className="ghost-button"
+                        style={{ width: "100%", justifyContent: "center" }}
+                        onClick={() => handleProductEditStart(product)}
+                      >
+                        Edit product
+                      </button>
+                    </>
+                  )}
                 </article>
               );
             })}
